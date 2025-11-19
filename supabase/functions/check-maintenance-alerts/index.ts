@@ -198,6 +198,18 @@ serve(async (req) => {
           .single();
 
         if (profile?.email) {
+          // Créer une entrée dans l'historique des notifications
+          const { data: notificationHistoryEntry } = await supabase
+            .from('notification_history')
+            .insert({
+              user_id: vehicle.user_id,
+              alert_id: createdAlert.id,
+              notification_type: 'email',
+              status: 'pending',
+            })
+            .select()
+            .single();
+
           try {
             // Envoyer l'email via l'API Resend directement
             const emailResponse = await fetch('https://api.resend.com/emails', {
@@ -236,6 +248,17 @@ serve(async (req) => {
 
             if (!emailResponse.ok) {
               console.error('Resend API error:', emailData);
+              
+              // Mettre à jour l'historique avec le statut échec
+              if (notificationHistoryEntry) {
+                await supabase
+                  .from('notification_history')
+                  .update({
+                    status: 'failed',
+                    error_message: JSON.stringify(emailData),
+                  })
+                  .eq('id', notificationHistoryEntry.id);
+              }
             } else {
               emailsSent++;
               
@@ -248,9 +271,33 @@ serve(async (req) => {
                   email_sent: true,
                 })
                 .eq('id', createdAlert.id);
+              
+              // Mettre à jour l'historique avec le statut succès
+              if (notificationHistoryEntry) {
+                await supabase
+                  .from('notification_history')
+                  .update({
+                    status: 'sent',
+                    sent_at: new Date().toISOString(),
+                  })
+                  .eq('id', notificationHistoryEntry.id);
+              }
+              
+              console.log(`Email sent successfully to ${profile.email} for alert ${createdAlert.id}`);
             }
           } catch (emailError) {
             console.error('Error sending email:', emailError);
+            
+            // Mettre à jour l'historique avec le statut échec
+            if (notificationHistoryEntry) {
+              await supabase
+                .from('notification_history')
+                .update({
+                  status: 'failed',
+                  error_message: emailError instanceof Error ? emailError.message : String(emailError),
+                })
+                .eq('id', notificationHistoryEntry.id);
+            }
           }
         }
       }
