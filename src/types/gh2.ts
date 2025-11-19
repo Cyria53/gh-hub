@@ -140,10 +140,25 @@ export interface Pointage {
   id: string;
   user_id: string;
   check_in: string;
-  check_out?: string;
-  hours_worked?: number;
+  check_out: string | null;
+  hours_worked: number | null;
   is_billable: boolean;
-  notes?: string;
+  notes: string | null;
+  status: 'pending' | 'approved' | 'rejected';
+  validated_by: string | null;
+  validated_at: string | null;
+  validation_comment: string | null;
+  created_at: string;
+}
+
+export interface PointageHistory {
+  id: string;
+  pointage_id: string;
+  changed_by: string;
+  change_type: 'created' | 'updated' | 'validated' | 'rejected' | 'modified';
+  old_values: Record<string, any> | null;
+  new_values: Record<string, any> | null;
+  comment: string | null;
   created_at: string;
 }
 

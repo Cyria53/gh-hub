@@ -46,7 +46,7 @@ export function usePointage() {
         .order('check_in', { ascending: false });
 
       if (error) throw error;
-      setPointages(data || []);
+      setPointages((data || []) as Pointage[]);
     } catch (error) {
       console.error('Error fetching pointages:', error);
       toast({
@@ -74,7 +74,7 @@ export function usePointage() {
         .single();
 
       if (error && error.code !== 'PGRST116') throw error;
-      setCurrentPointage(data || null);
+      setCurrentPointage((data || null) as Pointage | null);
     } catch (error) {
       console.error('Error fetching current pointage:', error);
     }
