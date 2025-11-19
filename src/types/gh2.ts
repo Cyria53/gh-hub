@@ -118,7 +118,7 @@ export interface MarketplaceItem {
   images_urls?: string[];
   stock_quantity: number;
   is_available: boolean;
-  specifications?: Record<string, any>;
+  specifications?: Record<string, any> | null;
   created_at: string;
   updated_at: string;
 }

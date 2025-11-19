@@ -14,6 +14,9 @@ import DiagnosticResult from "./pages/DiagnosticResult";
 import DiagnosticHistory from "./pages/DiagnosticHistory";
 import MissionsList from "./pages/MissionsList";
 import MissionDetail from "./pages/MissionDetail";
+import Marketplace from "./pages/Marketplace";
+import Cart from "./pages/Cart";
+import PaymentSuccess from "./pages/PaymentSuccess";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
@@ -36,6 +39,9 @@ const App = () => (
           <Route path="/dashboard/diagnostic-history" element={<ProtectedRoute><DiagnosticHistory /></ProtectedRoute>} />
           <Route path="/missions" element={<ProtectedRoute><MissionsList /></ProtectedRoute>} />
           <Route path="/missions/:id" element={<ProtectedRoute><MissionDetail /></ProtectedRoute>} />
+          <Route path="/marketplace" element={<Marketplace />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/guest/diagnostic" element={<GuestDiagnostic />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
