@@ -107,7 +107,7 @@ export const usePushNotifications = () => {
         .update({
           push_subscription: subscriptionData,
           push_enabled: true,
-        })
+        } as any)
         .eq('user_id', user.id);
 
       if (error) throw error;
@@ -129,7 +129,7 @@ export const usePushNotifications = () => {
             .update({
               push_subscription: null,
               push_enabled: false,
-            })
+            } as any)
             .eq('user_id', user.id);
         }
 
