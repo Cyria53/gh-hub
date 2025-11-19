@@ -75,7 +75,7 @@ export default function NotificationsHistory() {
       if (!user) return;
 
       const { data, error } = await supabase
-        .from('notification_history')
+        .from('notification_history' as any)
         .select(`
           *,
           maintenance_alerts (
@@ -88,7 +88,7 @@ export default function NotificationsHistory() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setNotifications((data || []) as NotificationHistory[]);
+      setNotifications((data || []) as any);
     } catch (error) {
       console.error('Error fetching notifications:', error);
       toast({

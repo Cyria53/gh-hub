@@ -23,6 +23,7 @@ import {
   Mail,
   Loader2,
   Smartphone,
+  History,
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
@@ -100,6 +101,13 @@ export default function MaintenanceAlerts() {
           </div>
         </div>
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => navigate('/notifications-history')}
+          >
+            <History className="mr-2 h-4 w-4" />
+            Historique
+          </Button>
           <Button
             variant="outline"
             onClick={handleManualCheck}

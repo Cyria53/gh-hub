@@ -24,6 +24,7 @@ import VehicleForm from "./pages/VehicleForm";
 import VehicleDetail from "./pages/VehicleDetail";
 import CarteGriseScan from "./pages/CarteGriseScan";
 import MaintenanceAlerts from "./pages/MaintenanceAlerts";
+import NotificationsHistory from "./pages/NotificationsHistory";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
@@ -57,6 +58,7 @@ const App = () => (
           <Route path="/vehicles/:id" element={<ProtectedRoute><VehicleDetail /></ProtectedRoute>} />
           <Route path="/vehicles/:id/edit" element={<ProtectedRoute><VehicleForm /></ProtectedRoute>} />
           <Route path="/maintenance-alerts" element={<ProtectedRoute><MaintenanceAlerts /></ProtectedRoute>} />
+          <Route path="/notifications-history" element={<ProtectedRoute><NotificationsHistory /></ProtectedRoute>} />
           <Route path="/guest/diagnostic" element={<GuestDiagnostic />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
