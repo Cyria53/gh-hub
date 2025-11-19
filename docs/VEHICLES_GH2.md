@@ -26,6 +26,7 @@ Le module Véhicules permet aux clients de gérer leur parc automobile avec :
    - Validation des données
    - Bouton "Scanner carte grise"
    - Mode édition avec données pré-remplies
+   - Pré-remplissage automatique depuis scan OCR
 
 3. **`src/pages/VehicleDetail.tsx`**
    - Vue détaillée d'un véhicule
@@ -35,12 +36,33 @@ Le module Véhicules permet aux clients de gérer leur parc automobile avec :
    - Dialog pour ajouter une intervention
    - Actions de suppression par intervention
 
-4. **`src/pages/CarteGriseScan.tsx`**
+4. **`src/pages/CarteGriseScan.tsx`** (✅ Complet avec OCR)
    - Upload de photo de carte grise
-   - Aperçu de l'image
+   - Validation taille (max 10MB) et format (JPG/PNG/WEBP)
+   - Aperçu de l'image uploadée
    - Conseils pour un bon scan
-   - Appel à l'OCR (fonctionnalité future)
-   - Redirection vers formulaire avec données extraites
+   - Appel à l'OCR via edge function
+   - Affichage des données extraites avec vérification
+   - Gestion des erreurs (rate limits 429, crédits 402, extraction)
+   - Redirection vers formulaire avec données pré-remplies
+
+### Edge Functions
+
+**`supabase/functions/carte-grise-ocr/index.ts`** (✅ Nouveau)
+- Reçoit une image en base64
+- Utilise Lovable AI (Google Gemini Vision) pour OCR
+- Extrait les champs standardisés de carte grise française:
+  - A: Immatriculation
+  - B: Date 1ère immatriculation
+  - D.1: Marque
+  - D.3: Modèle
+  - E: Numéro VIN (17 caractères)
+  - P.3: Type de carburant
+  - Y.1: Couleur
+- Parser et nettoyer les données JSON
+- Validation et normalisation
+- Gestion des erreurs rate limits et crédits
+- CORS activé pour appels web
 
 ### Hooks
 
@@ -184,12 +206,14 @@ WITH CHECK (
 3. Remplissage du formulaire
 4. Soumission → Enregistrement en base
 
-**Option 2: Scan carte grise**
+**Option 2: Scan carte grise (✅ Implémenté)**
 1. Depuis le formulaire, clic sur "Scanner carte grise"
-2. Upload de la photo
-3. OCR extrait les données (future)
-4. Redirection vers formulaire pré-rempli
-5. Vérification et validation
+2. Upload de la photo (max 10MB, JPG/PNG/WEBP)
+3. OCR extrait les données via Lovable AI (Gemini Vision)
+   - Champs extraits: A (immatriculation), B (date 1ère immat.), D.1 (marque), D.3 (modèle), E (VIN), P.3 (carburant), Y.1 (couleur)
+4. Affichage des données extraites pour vérification
+5. Redirection vers formulaire pré-rempli
+6. Vérification et validation manuelle si nécessaire
 
 ### 2. Voir détails d'un véhicule
 
@@ -243,13 +267,16 @@ Liste des types prédéfinis:
 
 ## Fonctionnalités futures
 
-### OCR Carte Grise (V2)
-- [ ] Edge function pour extraction OCR
-- [ ] Intégration API OCR (Google Vision, AWS Textract, ou Azure)
-- [ ] Parsing des données extraites
-- [ ] Mapping vers champs véhicule
-- [ ] Gestion des erreurs OCR
-- [ ] Amélioration de la qualité d'image avant scan
+### OCR Carte Grise (✅ Implémenté)
+- [x] Edge function pour extraction OCR
+- [x] Intégration Lovable AI (Google Gemini Vision)
+- [x] Parsing des données extraites
+- [x] Mapping vers champs véhicule
+- [x] Gestion des erreurs OCR et rate limits
+- [x] Validation taille et format image
+- [x] Pré-remplissage formulaire avec données scannées
+- [ ] Amélioration qualité image avant scan
+- [ ] Support carte grise recto/verso
 
 ### Alertes maintenance (V2)
 - [ ] Notification X jours avant maintenance prévue

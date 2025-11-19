@@ -3,5 +3,8 @@ project_id = "dvogximhxcgoroiqnjea"
 [functions.diagnostic-ai]
 verify_jwt = false
 
+[functions.carte-grise-ocr]
+verify_jwt = false
+
 [functions.create-checkout]
 verify_jwt = true
