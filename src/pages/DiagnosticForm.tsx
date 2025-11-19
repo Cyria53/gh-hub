@@ -61,20 +61,32 @@ export default function DiagnosticForm() {
     setIsSubmitting(true);
 
     try {
-      // TODO: Upload files to Supabase Storage
-      // TODO: Call OCR API for carte grise
-      // TODO: Call AI diagnostic API
-      
-      // For now, create a basic diagnostic entry
+      // Appel à l'API IA pour le diagnostic
+      const { data: aiResult, error: aiError } = await supabase.functions.invoke('diagnostic-ai', {
+        body: {
+          symptomDescription: description || 'Voyant moteur allumé',
+          vehicleInfo: carteGrisePhoto ? 'Carte grise fournie' : 'Informations du véhicule non fournies'
+        }
+      });
+
+      if (aiError) {
+        console.error('AI diagnostic error:', aiError);
+        throw new Error('Erreur lors de l\'analyse IA');
+      }
+
+      console.log('AI diagnostic result:', aiResult);
+
+      // Créer l'entrée de diagnostic avec les résultats de l'IA
       const { data: diagnostic, error: diagnosticError } = await supabase
         .from('diagnostics')
         .insert({
           user_id: user?.id,
           is_guest: !user,
-          ai_diagnosis: 'Analyse en cours...',
-          severity: 'medium',
-          estimated_cost_min: 150,
-          estimated_cost_max: 350,
+          ai_diagnosis: aiResult.diagnostic,
+          severity: aiResult.severity,
+          estimated_cost_min: aiResult.estimated_cost_min,
+          estimated_cost_max: aiResult.estimated_cost_max,
+          recommendations: aiResult.recommendations,
         })
         .select()
         .single();
@@ -82,8 +94,8 @@ export default function DiagnosticForm() {
       if (diagnosticError) throw diagnosticError;
 
       toast({
-        title: "Diagnostic créé",
-        description: "Votre diagnostic a été envoyé pour analyse",
+        title: "Diagnostic terminé",
+        description: "Votre véhicule a été analysé avec succès",
       });
 
       navigate(`/dashboard/diagnostic-result/${diagnostic.id}`);
@@ -91,7 +103,7 @@ export default function DiagnosticForm() {
       console.error('Error creating diagnostic:', error);
       toast({
         title: "Erreur",
-        description: "Impossible de créer le diagnostic",
+        description: error instanceof Error ? error.message : "Impossible de créer le diagnostic",
         variant: "destructive",
       });
     } finally {
