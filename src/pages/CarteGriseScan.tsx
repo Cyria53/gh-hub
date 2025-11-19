@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Upload, Scan, Loader2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Upload, Scan, Loader2, AlertCircle, Sparkles } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import { preprocessImage } from '@/lib/imageProcessing';
+import { Switch } from '@/components/ui/switch';
 
 export default function CarteGriseScan() {
   const navigate = useNavigate();
@@ -15,10 +17,13 @@ export default function CarteGriseScan() {
   const [scanning, setScanning] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
+  const [processedPreviewUrl, setProcessedPreviewUrl] = useState<string>('');
   const [extractedData, setExtractedData] = useState<any>(null);
   const [error, setError] = useState<string>('');
+  const [enablePreprocessing, setEnablePreprocessing] = useState(true);
+  const [preprocessing, setPreprocessing] = useState(false);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       // Vérifier la taille (max 10MB)
@@ -35,19 +40,48 @@ export default function CarteGriseScan() {
 
       setSelectedFile(file);
       setPreviewUrl(URL.createObjectURL(file));
+      setProcessedPreviewUrl('');
       setError('');
       setExtractedData(null);
+
+      // Pré-traiter automatiquement si activé
+      if (enablePreprocessing) {
+        await handlePreprocess(file);
+      }
     }
   };
 
-  const convertToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = error => reject(error);
-    });
+  const handlePreprocess = async (file: File) => {
+    if (!file) return;
+
+    setPreprocessing(true);
+    try {
+      const processedBase64 = await preprocessImage(file, {
+        enhanceContrast: true,
+        autoRotate: true,
+        autoCrop: true,
+        sharpen: true,
+        maxDimension: 2048,
+      });
+
+      setProcessedPreviewUrl(processedBase64);
+      
+      toast({
+        title: 'Image optimisée',
+        description: 'Contraste, netteté et orientation améliorés',
+      });
+    } catch (error) {
+      console.error('Preprocessing error:', error);
+      toast({
+        title: 'Avertissement',
+        description: 'Le pré-traitement a échoué, utilisation de l\'image originale',
+        variant: 'destructive',
+      });
+    } finally {
+      setPreprocessing(false);
+    }
   };
+
 
   const handleScan = async () => {
     if (!selectedFile) {
@@ -63,8 +97,20 @@ export default function CarteGriseScan() {
     setError('');
 
     try {
-      // Convertir l'image en base64
-      const imageData = await convertToBase64(selectedFile);
+      // Utiliser l'image pré-traitée si disponible, sinon l'originale
+      let imageData: string;
+      
+      if (processedPreviewUrl && enablePreprocessing) {
+        imageData = processedPreviewUrl;
+      } else {
+        imageData = await preprocessImage(selectedFile, {
+          enhanceContrast: true,
+          autoRotate: true,
+          autoCrop: true,
+          sharpen: true,
+          maxDimension: 2048,
+        });
+      }
 
       // Appeler l'edge function OCR
       const { data, error: functionError } = await supabase.functions.invoke('carte-grise-ocr', {
@@ -148,6 +194,25 @@ export default function CarteGriseScan() {
             </Alert>
           )}
 
+          <div className="flex items-center justify-between p-4 bg-primary/5 border border-primary/20 rounded-lg">
+            <div className="flex items-center gap-3">
+              <Sparkles className="h-5 w-5 text-primary" />
+              <div>
+                <Label htmlFor="preprocessing" className="text-sm font-medium cursor-pointer">
+                  Optimisation automatique
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Améliore le contraste, la netteté et corrige l'orientation
+                </p>
+              </div>
+            </div>
+            <Switch
+              id="preprocessing"
+              checked={enablePreprocessing}
+              onCheckedChange={setEnablePreprocessing}
+            />
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="carte-grise">Photo de la carte grise</Label>
             <Input
@@ -164,13 +229,32 @@ export default function CarteGriseScan() {
 
           {previewUrl && (
             <div className="space-y-2">
-              <Label>Aperçu</Label>
-              <div className="border rounded-lg overflow-hidden">
-                <img
-                  src={previewUrl}
-                  alt="Aperçu carte grise"
-                  className="w-full h-auto"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Image originale</Label>
+                  <div className="border rounded-lg overflow-hidden mt-2">
+                    <img
+                      src={previewUrl}
+                      alt="Aperçu original"
+                      className="w-full h-auto"
+                    />
+                  </div>
+                </div>
+                {processedPreviewUrl && (
+                  <div>
+                    <Label className="flex items-center gap-2">
+                      Image optimisée
+                      {preprocessing && <Loader2 className="h-4 w-4 animate-spin" />}
+                    </Label>
+                    <div className="border border-primary/40 rounded-lg overflow-hidden mt-2">
+                      <img
+                        src={processedPreviewUrl}
+                        alt="Aperçu optimisé"
+                        className="w-full h-auto"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -253,10 +337,10 @@ export default function CarteGriseScan() {
             </Button>
             
             {!extractedData ? (
-              <Button
+            <Button
                 onClick={handleScan}
                 className="flex-1"
-                disabled={!selectedFile || scanning}
+                disabled={!selectedFile || scanning || preprocessing}
               >
                 {scanning ? (
                   <>

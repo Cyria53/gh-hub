@@ -36,12 +36,18 @@ Le module Véhicules permet aux clients de gérer leur parc automobile avec :
    - Dialog pour ajouter une intervention
    - Actions de suppression par intervention
 
-4. **`src/pages/CarteGriseScan.tsx`** (✅ Complet avec OCR)
+4. **`src/pages/CarteGriseScan.tsx`** (✅ Complet avec OCR et pré-traitement)
    - Upload de photo de carte grise
    - Validation taille (max 10MB) et format (JPG/PNG/WEBP)
-   - Aperçu de l'image uploadée
+   - **Pré-traitement automatique d'image activable:**
+     - Amélioration du contraste (étalement d'histogramme)
+     - Augmentation de la netteté (filtre de convolution)
+     - Détection et correction automatique de la rotation (Sobel + Hough)
+     - Recadrage automatique du document (détection des bords)
+   - Aperçu côte à côte: image originale vs image optimisée
+   - Switch pour activer/désactiver l'optimisation
    - Conseils pour un bon scan
-   - Appel à l'OCR via edge function
+   - Appel à l'OCR via edge function avec image optimisée
    - Affichage des données extraites avec vérification
    - Gestion des erreurs (rate limits 429, crédits 402, extraction)
    - Redirection vers formulaire avec données pré-remplies
@@ -275,7 +281,13 @@ Liste des types prédéfinis:
 - [x] Gestion des erreurs OCR et rate limits
 - [x] Validation taille et format image
 - [x] Pré-remplissage formulaire avec données scannées
-- [ ] Amélioration qualité image avant scan
+- [x] **Pré-traitement d'image côté client:**
+  - [x] Amélioration automatique du contraste
+  - [x] Augmentation de la netteté
+  - [x] Détection et correction de la rotation
+  - [x] Recadrage automatique du document
+  - [x] Aperçu avant/après
+  - [x] Option activable/désactivable
 - [ ] Support carte grise recto/verso
 
 ### Alertes maintenance (V2)
