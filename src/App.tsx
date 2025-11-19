@@ -17,6 +17,7 @@ import MissionDetail from "./pages/MissionDetail";
 import Marketplace from "./pages/Marketplace";
 import Cart from "./pages/Cart";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import Pointage from "./pages/Pointage";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
@@ -42,6 +43,7 @@ const App = () => (
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
+          <Route path="/pointage" element={<ProtectedRoute><Pointage /></ProtectedRoute>} />
           <Route path="/guest/diagnostic" element={<GuestDiagnostic />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
