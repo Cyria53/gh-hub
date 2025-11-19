@@ -19,6 +19,10 @@ import Cart from "./pages/Cart";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Pointage from "./pages/Pointage";
 import PointageAdmin from "./pages/PointageAdmin";
+import VehiclesList from "./pages/VehiclesList";
+import VehicleForm from "./pages/VehicleForm";
+import VehicleDetail from "./pages/VehicleDetail";
+import CarteGriseScan from "./pages/CarteGriseScan";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
@@ -46,6 +50,11 @@ const App = () => (
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/pointage" element={<ProtectedRoute><Pointage /></ProtectedRoute>} />
           <Route path="/pointage/admin" element={<ProtectedRoute><PointageAdmin /></ProtectedRoute>} />
+          <Route path="/vehicles" element={<ProtectedRoute><VehiclesList /></ProtectedRoute>} />
+          <Route path="/vehicles/add" element={<ProtectedRoute><VehicleForm /></ProtectedRoute>} />
+          <Route path="/vehicles/scan" element={<ProtectedRoute><CarteGriseScan /></ProtectedRoute>} />
+          <Route path="/vehicles/:id" element={<ProtectedRoute><VehicleDetail /></ProtectedRoute>} />
+          <Route path="/vehicles/:id/edit" element={<ProtectedRoute><VehicleForm /></ProtectedRoute>} />
           <Route path="/guest/diagnostic" element={<GuestDiagnostic />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

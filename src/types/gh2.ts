@@ -162,6 +162,23 @@ export interface PointageHistory {
   created_at: string;
 }
 
+export interface VehicleMaintenance {
+  id: string;
+  vehicle_id: string;
+  user_id: string;
+  maintenance_type: string;
+  description: string | null;
+  mileage: number | null;
+  cost: number | null;
+  performed_by: string | null;
+  performed_at: string;
+  next_maintenance_date: string | null;
+  documents_urls: string[] | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Notification {
   id: string;
   user_id: string;
