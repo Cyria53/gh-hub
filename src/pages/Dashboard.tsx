@@ -14,7 +14,8 @@ import {
   MapPin, 
   LogOut,
   FileText,
-  Star
+  Star,
+  History
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -81,6 +82,24 @@ export default function Dashboard() {
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
                     Upload une photo de votre voyant moteur pour un diagnostic instantané
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Historique Diagnostics */}
+              <Card className="hover:shadow-premium transition-shadow cursor-pointer" onClick={() => navigate('/dashboard/diagnostic-history')}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <History className="h-5 w-5 text-primary" />
+                    Historique Diagnostics
+                  </CardTitle>
+                  <CardDescription>
+                    Consultez vos analyses passées
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Accédez à tous vos diagnostics et rapports
                   </p>
                 </CardContent>
               </Card>
