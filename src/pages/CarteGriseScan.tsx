@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Upload, Scan, Loader2 } from 'lucide-react';
+import { ArrowLeft, Upload, Scan, Loader2, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 
 export default function CarteGriseScan() {
@@ -13,13 +15,38 @@ export default function CarteGriseScan() {
   const [scanning, setScanning] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
+  const [extractedData, setExtractedData] = useState<any>(null);
+  const [error, setError] = useState<string>('');
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Vérifier la taille (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        setError('Le fichier est trop volumineux (max 10MB)');
+        return;
+      }
+
+      // Vérifier le type
+      if (!file.type.startsWith('image/')) {
+        setError('Veuillez sélectionner une image');
+        return;
+      }
+
       setSelectedFile(file);
       setPreviewUrl(URL.createObjectURL(file));
+      setError('');
+      setExtractedData(null);
     }
+  };
+
+  const convertToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
   };
 
   const handleScan = async () => {
@@ -33,28 +60,58 @@ export default function CarteGriseScan() {
     }
 
     setScanning(true);
+    setError('');
 
     try {
-      // TODO: Appeler l'edge function OCR pour extraire les données
-      // Pour l'instant, simulons un délai
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Convertir l'image en base64
+      const imageData = await convertToBase64(selectedFile);
 
-      toast({
-        title: 'Fonctionnalité en développement',
-        description: 'Le scan OCR de carte grise sera disponible prochainement',
+      // Appeler l'edge function OCR
+      const { data, error: functionError } = await supabase.functions.invoke('carte-grise-ocr', {
+        body: { imageData }
       });
 
-      // Après le scan réussi, rediriger vers le formulaire avec les données
-      // navigate('/vehicles/add', { state: { extractedData: data } });
-    } catch (error) {
+      if (functionError) throw functionError;
+
+      if (!data.success) {
+        throw new Error(data.error || 'Échec de l\'extraction');
+      }
+
+      setExtractedData(data.data);
+
+      toast({
+        title: 'Extraction réussie',
+        description: 'Les données ont été extraites. Vérifiez-les avant de continuer.',
+      });
+
+    } catch (error: any) {
       console.error('Error scanning:', error);
+      
+      let errorMessage = 'Impossible de scanner la carte grise';
+      
+      if (error.message?.includes('429')) {
+        errorMessage = 'Trop de requêtes. Veuillez réessayer dans quelques instants.';
+      } else if (error.message?.includes('402')) {
+        errorMessage = 'Crédits AI insuffisants. Veuillez contacter le support.';
+      } else if (error.message?.includes('No relevant data')) {
+        errorMessage = 'Aucune donnée exploitable trouvée. Assurez-vous que l\'image est claire et bien cadrée.';
+      }
+
+      setError(errorMessage);
+      
       toast({
         title: 'Erreur',
-        description: 'Impossible de scanner la carte grise',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
       setScanning(false);
+    }
+  };
+
+  const handleContinue = () => {
+    if (extractedData) {
+      navigate('/vehicles/add', { state: { extractedData } });
     }
   };
 
@@ -83,6 +140,14 @@ export default function CarteGriseScan() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Erreur</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="carte-grise">Photo de la carte grise</Label>
             <Input
@@ -110,6 +175,59 @@ export default function CarteGriseScan() {
             </div>
           )}
 
+          {extractedData && (
+            <div className="space-y-2">
+              <Label>Données extraites</Label>
+              <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-2 text-sm">
+                {extractedData.license_plate && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Immatriculation:</span>
+                    <span className="font-medium">{extractedData.license_plate}</span>
+                  </div>
+                )}
+                {extractedData.brand && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Marque:</span>
+                    <span className="font-medium">{extractedData.brand}</span>
+                  </div>
+                )}
+                {extractedData.model && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Modèle:</span>
+                    <span className="font-medium">{extractedData.model}</span>
+                  </div>
+                )}
+                {extractedData.vin && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">VIN:</span>
+                    <span className="font-medium font-mono text-xs">{extractedData.vin}</span>
+                  </div>
+                )}
+                {extractedData.fuel_type && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Carburant:</span>
+                    <span className="font-medium capitalize">{extractedData.fuel_type}</span>
+                  </div>
+                )}
+                {extractedData.year && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Année:</span>
+                    <span className="font-medium">{extractedData.year}</span>
+                  </div>
+                )}
+                {extractedData.color && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Couleur:</span>
+                    <span className="font-medium">{extractedData.color}</span>
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Vérifiez les données avant de continuer
+              </p>
+            </div>
+          )}
+
           <div className="bg-muted p-4 rounded-lg space-y-2">
             <h4 className="font-medium flex items-center gap-2">
               <Upload className="h-4 w-4" />
@@ -133,23 +251,33 @@ export default function CarteGriseScan() {
             >
               Saisir manuellement
             </Button>
-            <Button
-              onClick={handleScan}
-              className="flex-1"
-              disabled={!selectedFile || scanning}
-            >
-              {scanning ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Scan en cours...
-                </>
-              ) : (
-                <>
-                  <Scan className="mr-2 h-4 w-4" />
-                  Scanner
-                </>
-              )}
-            </Button>
+            
+            {!extractedData ? (
+              <Button
+                onClick={handleScan}
+                className="flex-1"
+                disabled={!selectedFile || scanning}
+              >
+                {scanning ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Extraction en cours...
+                  </>
+                ) : (
+                  <>
+                    <Scan className="mr-2 h-4 w-4" />
+                    Extraire les données
+                  </>
+                )}
+              </Button>
+            ) : (
+              <Button
+                onClick={handleContinue}
+                className="flex-1"
+              >
+                Continuer avec ces données
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>

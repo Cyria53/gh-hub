@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useVehicles } from '@/hooks/useVehicles';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,11 +12,13 @@ import { useToast } from '@/hooks/use-toast';
 export default function VehicleForm() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { vehicles, addVehicle, updateVehicle } = useVehicles();
   const { toast } = useToast();
 
   const isEditMode = Boolean(id);
   const existingVehicle = vehicles.find(v => v.id === id);
+  const extractedData = location.state?.extractedData;
 
   const [formData, setFormData] = useState({
     license_plate: '',
@@ -43,8 +45,26 @@ export default function VehicleForm() {
         mileage: existingVehicle.mileage || 0,
         first_registration_date: existingVehicle.first_registration_date || '',
       });
+    } else if (extractedData) {
+      // Pré-remplir avec les données extraites du scan
+      setFormData({
+        license_plate: extractedData.license_plate || '',
+        brand: extractedData.brand || '',
+        model: extractedData.model || '',
+        year: extractedData.year || new Date().getFullYear(),
+        vin: extractedData.vin || '',
+        fuel_type: extractedData.fuel_type || '',
+        color: extractedData.color || '',
+        mileage: 0,
+        first_registration_date: extractedData.first_registration_date || '',
+      });
+
+      toast({
+        title: 'Données importées',
+        description: 'Vérifiez et complétez les informations si nécessaire',
+      });
     }
-  }, [isEditMode, existingVehicle]);
+  }, [isEditMode, existingVehicle, extractedData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
