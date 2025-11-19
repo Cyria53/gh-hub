@@ -118,7 +118,7 @@ export default function Dashboard() {
                 </Card>
               )}
 
-              <Card className="hover:shadow-premium transition-shadow cursor-pointer">
+              <Card className="hover:shadow-premium transition-shadow cursor-pointer" onClick={() => navigate('/vehicles')}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Car className="h-5 w-5 text-primary" />

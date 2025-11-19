@@ -703,6 +703,65 @@ export type Database = {
           },
         ]
       }
+      vehicle_maintenance: {
+        Row: {
+          cost: number | null
+          created_at: string | null
+          description: string | null
+          documents_urls: string[] | null
+          id: string
+          maintenance_type: string
+          mileage: number | null
+          next_maintenance_date: string | null
+          notes: string | null
+          performed_at: string
+          performed_by: string | null
+          updated_at: string | null
+          user_id: string
+          vehicle_id: string
+        }
+        Insert: {
+          cost?: number | null
+          created_at?: string | null
+          description?: string | null
+          documents_urls?: string[] | null
+          id?: string
+          maintenance_type: string
+          mileage?: number | null
+          next_maintenance_date?: string | null
+          notes?: string | null
+          performed_at: string
+          performed_by?: string | null
+          updated_at?: string | null
+          user_id: string
+          vehicle_id: string
+        }
+        Update: {
+          cost?: number | null
+          created_at?: string | null
+          description?: string | null
+          documents_urls?: string[] | null
+          id?: string
+          maintenance_type?: string
+          mileage?: number | null
+          next_maintenance_date?: string | null
+          notes?: string | null
+          performed_at?: string
+          performed_by?: string | null
+          updated_at?: string | null
+          user_id?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_maintenance_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicles: {
         Row: {
           brand: string | null
