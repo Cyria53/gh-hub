@@ -227,6 +227,81 @@ export type Database = {
           },
         ]
       }
+      maintenance_alerts: {
+        Row: {
+          alert_reason: string
+          alert_type: string
+          created_at: string
+          current_mileage: number | null
+          days_until_due: number | null
+          dismissed_at: string | null
+          email_sent: boolean | null
+          id: string
+          km_until_due: number | null
+          maintenance_id: string | null
+          sent_at: string | null
+          status: string
+          threshold_date: string | null
+          threshold_mileage: number | null
+          updated_at: string
+          user_id: string
+          vehicle_id: string
+        }
+        Insert: {
+          alert_reason: string
+          alert_type: string
+          created_at?: string
+          current_mileage?: number | null
+          days_until_due?: number | null
+          dismissed_at?: string | null
+          email_sent?: boolean | null
+          id?: string
+          km_until_due?: number | null
+          maintenance_id?: string | null
+          sent_at?: string | null
+          status?: string
+          threshold_date?: string | null
+          threshold_mileage?: number | null
+          updated_at?: string
+          user_id: string
+          vehicle_id: string
+        }
+        Update: {
+          alert_reason?: string
+          alert_type?: string
+          created_at?: string
+          current_mileage?: number | null
+          days_until_due?: number | null
+          dismissed_at?: string | null
+          email_sent?: boolean | null
+          id?: string
+          km_until_due?: number | null
+          maintenance_id?: string | null
+          sent_at?: string | null
+          status?: string
+          threshold_date?: string | null
+          threshold_mileage?: number | null
+          updated_at?: string
+          user_id?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_alerts_maintenance_id_fkey"
+            columns: ["maintenance_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_maintenance"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_alerts_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marketplace_items: {
         Row: {
           category: string
@@ -413,6 +488,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          email_days_before: Json | null
+          email_enabled: boolean | null
+          id: string
+          mileage_enabled: boolean | null
+          mileage_threshold_km: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_days_before?: Json | null
+          email_enabled?: boolean | null
+          id?: string
+          mileage_enabled?: boolean | null
+          mileage_threshold_km?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_days_before?: Json | null
+          email_enabled?: boolean | null
+          id?: string
+          mileage_enabled?: boolean | null
+          mileage_threshold_km?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       notifications: {
         Row: {
