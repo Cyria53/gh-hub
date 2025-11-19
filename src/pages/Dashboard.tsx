@@ -170,7 +170,7 @@ export default function Dashboard() {
               </Card>
 
               {hasAnyRole('technicien', 'gerant', 'rh', 'admin_gh2') && (
-                <Card className="hover:shadow-premium transition-shadow cursor-pointer">
+                <Card className="hover:shadow-premium transition-shadow cursor-pointer" onClick={() => navigate('/pointage')}>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Clock className="h-5 w-5 text-primary" />
