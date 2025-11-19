@@ -1,16 +1,20 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { usePointage } from '@/hooks/usePointage';
+import { useUserRole } from '@/hooks/useUserRole';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Clock, Download, LogIn, LogOut } from 'lucide-react';
+import { Clock, Download, LogIn, LogOut, Users } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 export default function Pointage() {
+  const navigate = useNavigate();
+  const { hasAnyRole } = useUserRole();
   const { pointages, currentPointage, loading, checkIn, checkOut, exportToCSV } = usePointage();
   const [notes, setNotes] = useState('');
   const [isBillable, setIsBillable] = useState(true);
@@ -35,10 +39,18 @@ export default function Pointage() {
           <h1 className="text-3xl font-bold text-foreground">Pointage RH</h1>
           <p className="text-muted-foreground">Gestion des heures de travail</p>
         </div>
-        <Button onClick={exportToCSV} variant="outline">
-          <Download className="mr-2 h-4 w-4" />
-          Export CSV
-        </Button>
+        <div className="flex gap-2">
+          {hasAnyRole('rh', 'gerant', 'admin_gh2') && (
+            <Button onClick={() => navigate('/pointage/admin')} variant="secondary">
+              <Users className="mr-2 h-4 w-4" />
+              Vue Admin
+            </Button>
+          )}
+          <Button onClick={exportToCSV} variant="outline">
+            <Download className="mr-2 h-4 w-4" />
+            Export CSV
+          </Button>
+        </div>
       </div>
 
       <div className="grid md:grid-cols-3 gap-4">
