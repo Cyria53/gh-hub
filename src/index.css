@@ -2,95 +2,77 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* ==========================================
+   GH₂ DESIGN SYSTEM - Premium Automotive Theme
+   ========================================== */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* === GH₂ Core Colors === */
+    --gh2-blue: 205 100% 45%;        /* Bleu hydrogène signature */
+    --gh2-graphite: 210 10% 23%;     /* Gris graphite */
+    --gh2-carbon: 210 12% 16%;       /* Fibre carbone foncé */
+    --gh2-silver: 210 5% 85%;        /* Argent brillant */
+    --gh2-white: 0 0% 100%;          /* Blanc pur */
+    
+    /* === Role Colors === */
+    --role-client: 205 100% 45%;     /* Bleu GH₂ */
+    --role-technicien: 210 10% 23%;  /* Gris graphite */
+    --role-gerant: 158 58% 33%;      /* Vert pro #1F8A70 */
+    --role-admin: 0 60% 50%;         /* Rouge admin #C73737 */
+    --role-rh: 29 77% 54%;           /* Orange RH #E9892A */
+    --role-invite: 210 5% 75%;       /* Gris silver */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    /* === Base System === */
+    --background: 210 15% 11%;
+    --foreground: 0 0% 98%;
+    
+    --card: 210 12% 16%;
+    --card-foreground: 0 0% 98%;
+    
+    --popover: 210 15% 14%;
+    --popover-foreground: 0 0% 98%;
+    
+    --primary: 205 100% 45%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 210 10% 23%;
+    --secondary-foreground: 0 0% 98%;
+    
+    --muted: 210 12% 20%;
+    --muted-foreground: 210 5% 65%;
+    
+    --accent: 205 100% 45%;
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 0 60% 50%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 210 12% 25%;
+    --input: 210 12% 25%;
+    --ring: 205 100% 45%;
+    
+    --radius: 0.75rem;
+    
+    /* === Gradients === */
+    --gradient-carbon: linear-gradient(135deg, hsl(210 12% 16%) 0%, hsl(210 15% 11%) 100%);
+    --gradient-blue: linear-gradient(135deg, hsl(205 100% 45%) 0%, hsl(210 100% 35%) 100%);
+    --gradient-premium: linear-gradient(135deg, hsl(210 12% 16%) 0%, hsl(205 100% 45% / 0.2) 100%);
+    
+    /* === Shadows === */
+    --shadow-premium: 0 10px 40px -10px hsl(205 100% 45% / 0.4);
+    --shadow-card: 0 4px 20px hsl(210 15% 8% / 0.5);
+    --shadow-glow: 0 0 30px hsl(205 100% 45% / 0.3);
+    
+    /* === Sidebar === */
+    --sidebar-background: 210 12% 16%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 205 100% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 210 12% 20%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 210 12% 25%;
+    --sidebar-ring: 205 100% 45%;
   }
 }
 
@@ -100,6 +82,62 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+    background-image: 
+      radial-gradient(circle at 25% 25%, hsl(205 100% 45% / 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, hsl(205 100% 45% / 0.03) 0%, transparent 50%);
+  }
+  
+  /* === Carbon Fiber Pattern === */
+  .carbon-fiber {
+    background-image: 
+      repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 2px,
+        hsl(210 12% 14% / 0.3) 2px,
+        hsl(210 12% 14% / 0.3) 4px
+      ),
+      repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 2px,
+        hsl(210 12% 14% / 0.2) 2px,
+        hsl(210 12% 14% / 0.2) 4px
+      );
+    background-size: 10px 10px;
+  }
+  
+  /* === Premium Animations === */
+  @keyframes glow-pulse {
+    0%, 100% {
+      box-shadow: 0 0 20px hsl(205 100% 45% / 0.3);
+    }
+    50% {
+      box-shadow: 0 0 30px hsl(205 100% 45% / 0.6);
+    }
+  }
+  
+  .animate-glow {
+    animation: glow-pulse 3s ease-in-out infinite;
+  }
+  
+  /* === Scrollbar Styling === */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--card));
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary));
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.8);
   }
 }

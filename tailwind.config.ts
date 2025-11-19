@@ -57,6 +57,31 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        gh2: {
+          blue: "hsl(var(--gh2-blue))",
+          graphite: "hsl(var(--gh2-graphite))",
+          carbon: "hsl(var(--gh2-carbon))",
+          silver: "hsl(var(--gh2-silver))",
+          white: "hsl(var(--gh2-white))",
+        },
+        role: {
+          client: "hsl(var(--role-client))",
+          technicien: "hsl(var(--role-technicien))",
+          gerant: "hsl(var(--role-gerant))",
+          admin: "hsl(var(--role-admin))",
+          rh: "hsl(var(--role-rh))",
+          invite: "hsl(var(--role-invite))",
+        },
+      },
+      backgroundImage: {
+        'gradient-carbon': 'var(--gradient-carbon)',
+        'gradient-blue': 'var(--gradient-blue)',
+        'gradient-premium': 'var(--gradient-premium)',
+      },
+      boxShadow: {
+        'premium': 'var(--shadow-premium)',
+        'card': 'var(--shadow-card)',
+        'glow': 'var(--shadow-glow)',
       },
       borderRadius: {
         lg: "var(--radius)",
