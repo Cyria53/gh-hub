@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMaintenanceAlerts } from '@/hooks/useMaintenanceAlerts';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +22,7 @@ import {
   RefreshCw,
   Mail,
   Loader2,
+  Smartphone,
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
@@ -34,6 +36,7 @@ export default function MaintenanceAlerts() {
     updatePreferences,
     triggerManualCheck,
   } = useMaintenanceAlerts();
+  const { isSupported, permission, subscription, requestPermission, unsubscribe } = usePushNotifications();
 
   const [prefsDialogOpen, setPrefsDialogOpen] = useState(false);
   const [emailEnabled, setEmailEnabled] = useState(preferences?.email_enabled ?? true);
@@ -176,6 +179,59 @@ export default function MaintenanceAlerts() {
                       Vous serez alerté X km avant la maintenance prévue
                     </p>
                   </div>
+                )}
+
+                {isSupported && (
+                  <>
+                    <Separator />
+                    
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <Label className="flex items-center gap-2">
+                            <Smartphone className="h-4 w-4" />
+                            Notifications Push
+                          </Label>
+                          <p className="text-sm text-muted-foreground">
+                            Recevoir des alertes même hors de l'application
+                          </p>
+                        </div>
+                        {permission === 'granted' && subscription ? (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={unsubscribe}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            Désactiver
+                          </Button>
+                        ) : permission !== 'denied' ? (
+                          <Button 
+                            size="sm"
+                            onClick={requestPermission}
+                          >
+                            Activer
+                          </Button>
+                        ) : null}
+                      </div>
+                      
+                      {permission === 'denied' && (
+                        <div className="rounded-lg bg-destructive/10 p-3">
+                          <p className="text-sm text-destructive">
+                            Les notifications sont bloquées. Autorisez-les dans les paramètres du navigateur.
+                          </p>
+                        </div>
+                      )}
+                      
+                      {permission === 'granted' && subscription && (
+                        <div className="rounded-lg bg-muted p-3">
+                          <p className="text-sm text-muted-foreground">
+                            ✓ Notifications push activées
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </>
                 )}
 
                 <div className="flex gap-2 justify-end">

@@ -497,6 +497,8 @@ export type Database = {
           id: string
           mileage_enabled: boolean | null
           mileage_threshold_km: number | null
+          push_enabled: boolean | null
+          push_subscription: string | null
           updated_at: string
           user_id: string
         }
@@ -507,6 +509,8 @@ export type Database = {
           id?: string
           mileage_enabled?: boolean | null
           mileage_threshold_km?: number | null
+          push_enabled?: boolean | null
+          push_subscription?: string | null
           updated_at?: string
           user_id: string
         }
@@ -517,6 +521,8 @@ export type Database = {
           id?: string
           mileage_enabled?: boolean | null
           mileage_threshold_km?: number | null
+          push_enabled?: boolean | null
+          push_subscription?: string | null
           updated_at?: string
           user_id?: string
         }
