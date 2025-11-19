@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Pointage } from '@/types/gh2';
+import { Pointage, PointageHistory } from '@/types/gh2';
 import { useToast } from '@/hooks/use-toast';
 
 interface PointageWithProfile extends Pointage {
@@ -122,7 +122,7 @@ export function usePointageAdmin() {
         const pointagesWithProfiles = pointagesData.map(p => ({
           ...p,
           profile: profilesMap.get(p.user_id),
-        }));
+        })) as PointageWithProfile[];
 
         setPointages(pointagesWithProfiles);
       } else {
@@ -162,6 +162,57 @@ export function usePointageAdmin() {
         description: 'Impossible de modifier le pointage',
         variant: 'destructive',
       });
+    }
+  }
+
+  async function validatePointage(id: string, status: 'approved' | 'rejected', comment?: string) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const { error } = await supabase
+        .from('pointage')
+        .update({
+          status,
+          validated_by: user.id,
+          validated_at: new Date().toISOString(),
+          validation_comment: comment || null,
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: status === 'approved' ? 'Pointage validé' : 'Pointage rejeté',
+        description: status === 'approved' 
+          ? 'Le pointage a été approuvé' 
+          : 'Le pointage a été rejeté',
+      });
+
+      fetchPointages();
+    } catch (error) {
+      console.error('Error validating pointage:', error);
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de valider le pointage',
+        variant: 'destructive',
+      });
+    }
+  }
+
+  async function fetchHistory(pointageId: string): Promise<PointageHistory[]> {
+    try {
+      const { data, error } = await supabase
+        .from('pointage_history')
+        .select('*')
+        .eq('pointage_id', pointageId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return (data || []) as PointageHistory[];
+    } catch (error) {
+      console.error('Error fetching history:', error);
+      return [];
     }
   }
 
@@ -221,6 +272,8 @@ export function usePointageAdmin() {
     filters,
     setFilters,
     updatePointage,
+    validatePointage,
+    fetchHistory,
     calculateStats,
     exportToCSV,
   };

@@ -7,8 +7,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Calendar, Download, Users, Clock, DollarSign, ArrowLeft } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Calendar, Download, Users, Clock, DollarSign, ArrowLeft, CheckCircle2, XCircle, History } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { ValidationDialog } from '@/components/pointage/ValidationDialog';
+import { HistoryDialog } from '@/components/pointage/HistoryDialog';
 
 export default function PointageAdmin() {
   const navigate = useNavigate();
@@ -19,12 +22,25 @@ export default function PointageAdmin() {
     loading, 
     filters, 
     setFilters, 
+    validatePointage,
+    fetchHistory,
     calculateStats, 
     exportToCSV 
   } = usePointageAdmin();
 
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [validationDialog, setValidationDialog] = useState<{
+    open: boolean;
+    action: 'approve' | 'reject';
+    pointageId: string;
+    employeeName: string;
+  }>({ open: false, action: 'approve', pointageId: '', employeeName: '' });
+  const [historyDialog, setHistoryDialog] = useState<{
+    open: boolean;
+    pointageId: string;
+    employeeName: string;
+  }>({ open: false, pointageId: '', employeeName: '' });
 
   // Redirect if not authorized
   if (!hasAnyRole('rh', 'gerant', 'admin_gh2')) {
@@ -74,6 +90,46 @@ export default function PointageAdmin() {
     setFilters({});
     setStartDate('');
     setEndDate('');
+  };
+
+  const handleValidation = (
+    pointageId: string, 
+    action: 'approve' | 'reject', 
+    employeeName: string
+  ) => {
+    setValidationDialog({
+      open: true,
+      action,
+      pointageId,
+      employeeName,
+    });
+  };
+
+  const handleValidationConfirm = (comment: string) => {
+    validatePointage(
+      validationDialog.pointageId, 
+      validationDialog.action === 'approve' ? 'approved' : 'rejected',
+      comment
+    );
+  };
+
+  const handleShowHistory = (pointageId: string, employeeName: string) => {
+    setHistoryDialog({
+      open: true,
+      pointageId,
+      employeeName,
+    });
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'approved':
+        return <Badge className="bg-primary">Validé</Badge>;
+      case 'rejected':
+        return <Badge variant="destructive">Rejeté</Badge>;
+      default:
+        return <Badge variant="secondary">En attente</Badge>;
+    }
   };
 
   return (
@@ -247,7 +303,8 @@ export default function PointageAdmin() {
                   <TableHead>Départ</TableHead>
                   <TableHead>Heures</TableHead>
                   <TableHead>Type</TableHead>
-                  <TableHead>Notes</TableHead>
+                  <TableHead>Statut</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -294,8 +351,53 @@ export default function PointageAdmin() {
                         <span className="text-muted-foreground">Non facturable</span>
                       )}
                     </TableCell>
-                    <TableCell className="max-w-xs truncate text-muted-foreground">
-                      {pointage.notes || '-'}
+                    <TableCell>
+                      {getStatusBadge(pointage.status)}
+                      {pointage.validation_comment && (
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {pointage.validation_comment}
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        {pointage.status === 'pending' && pointage.check_out && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleValidation(
+                                pointage.id, 
+                                'approve', 
+                                pointage.profile?.full_name || pointage.profile?.email || 'Employé'
+                              )}
+                            >
+                              <CheckCircle2 className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleValidation(
+                                pointage.id, 
+                                'reject', 
+                                pointage.profile?.full_name || pointage.profile?.email || 'Employé'
+                              )}
+                            >
+                              <XCircle className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleShowHistory(
+                            pointage.id,
+                            pointage.profile?.full_name || pointage.profile?.email || 'Employé'
+                          )}
+                        >
+                          <History className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -304,6 +406,22 @@ export default function PointageAdmin() {
           )}
         </CardContent>
       </Card>
+
+      <ValidationDialog
+        open={validationDialog.open}
+        onOpenChange={(open) => setValidationDialog({ ...validationDialog, open })}
+        action={validationDialog.action}
+        employeeName={validationDialog.employeeName}
+        onConfirm={handleValidationConfirm}
+      />
+
+      <HistoryDialog
+        open={historyDialog.open}
+        onOpenChange={(open) => setHistoryDialog({ ...historyDialog, open })}
+        pointageId={historyDialog.pointageId}
+        employeeName={historyDialog.employeeName}
+        fetchHistory={fetchHistory}
+      />
     </div>
   );
 }

@@ -510,7 +510,11 @@ export type Database = {
           id: string
           is_billable: boolean | null
           notes: string | null
+          status: string | null
           user_id: string
+          validated_at: string | null
+          validated_by: string | null
+          validation_comment: string | null
         }
         Insert: {
           check_in: string
@@ -520,7 +524,11 @@ export type Database = {
           id?: string
           is_billable?: boolean | null
           notes?: string | null
+          status?: string | null
           user_id: string
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_comment?: string | null
         }
         Update: {
           check_in?: string
@@ -530,9 +538,54 @@ export type Database = {
           id?: string
           is_billable?: boolean | null
           notes?: string | null
+          status?: string | null
           user_id?: string
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_comment?: string | null
         }
         Relationships: []
+      }
+      pointage_history: {
+        Row: {
+          change_type: string
+          changed_by: string
+          comment: string | null
+          created_at: string | null
+          id: string
+          new_values: Json | null
+          old_values: Json | null
+          pointage_id: string
+        }
+        Insert: {
+          change_type: string
+          changed_by: string
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          pointage_id: string
+        }
+        Update: {
+          change_type?: string
+          changed_by?: string
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          pointage_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pointage_history_pointage_id_fkey"
+            columns: ["pointage_id"]
+            isOneToOne: false
+            referencedRelation: "pointage"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
