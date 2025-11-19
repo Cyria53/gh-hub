@@ -152,7 +152,7 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="hover:shadow-premium transition-shadow cursor-pointer">
+              <Card className="hover:shadow-premium transition-shadow cursor-pointer" onClick={() => navigate('/marketplace')}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <ShoppingCart className="h-5 w-5 text-primary" />
