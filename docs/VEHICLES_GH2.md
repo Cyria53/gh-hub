@@ -290,11 +290,20 @@ Liste des types prédéfinis:
   - [x] Option activable/désactivable
 - [ ] Support carte grise recto/verso
 
-### Alertes maintenance (V2)
-- [ ] Notification X jours avant maintenance prévue
-- [ ] Alerte kilométrage (ex: vidange tous les 15 000 km)
-- [ ] Rappel contrôle technique annuel
-- [ ] Email/SMS pour rappels importants
+### Alertes maintenance (✅ Implémenté)
+- [x] Table maintenance_alerts et notification_preferences
+- [x] Edge function automatique check-maintenance-alerts
+- [x] Notifications X jours avant maintenance prévue (configurable: 7, 14, 30 jours)
+- [x] Alertes basées sur kilométrage (seuil configurable)
+- [x] Envoi automatique d'emails via Resend
+- [x] Dashboard des rappels avec statuts
+- [x] Préférences personnalisables par utilisateur
+- [x] Gestion des alertes (ignorer, historique)
+- [x] Vérification manuelle à la demande
+- [x] Real-time sync des alertes
+- [ ] SMS pour rappels importants (nécessite Twilio)
+- [ ] Notifications push web
+- [ ] Cron job automatique configuré (à activer)
 
 ### Export et rapports (V2)
 - [ ] Export historique en PDF

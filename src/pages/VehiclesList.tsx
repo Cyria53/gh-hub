@@ -3,7 +3,7 @@ import { useVehicles } from '@/hooks/useVehicles';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Car, Plus, Edit, Trash2, ArrowLeft, Calendar } from 'lucide-react';
+import { Car, Plus, Edit, Trash2, ArrowLeft, Calendar, Bell } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,10 +32,16 @@ export default function VehiclesList() {
             <p className="text-muted-foreground">Gérez votre parc automobile</p>
           </div>
         </div>
-        <Button onClick={() => navigate('/vehicles/add')}>
-          <Plus className="mr-2 h-4 w-4" />
-          Ajouter un véhicule
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => navigate('/maintenance-alerts')}>
+            <Bell className="mr-2 h-4 w-4" />
+            Alertes
+          </Button>
+          <Button onClick={() => navigate('/vehicles/add')}>
+            <Plus className="mr-2 h-4 w-4" />
+            Ajouter un véhicule
+          </Button>
+        </div>
       </div>
 
       {loading ? (
