@@ -1,27 +1,28 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { GH2Logo } from '@/components/GH2Logo';
 import { RoleBadge } from '@/components/RoleBadge';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { 
+  FileText, 
+  History, 
+  Briefcase,
   Car, 
   Wrench, 
   ShoppingCart, 
   Clock, 
   MapPin, 
   LogOut,
-  FileText,
-  Star,
-  History
+  Star
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
-  const { primaryRole, loading: roleLoading } = useUserRole();
+  const { primaryRole, hasAnyRole, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -37,7 +38,6 @@ export default function Dashboard() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen carbon-fiber">
-        {/* Header */}
         <header className="border-b border-border bg-card/50 backdrop-blur">
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
             <GH2Logo />
@@ -53,10 +53,8 @@ export default function Dashboard() {
           </div>
         </header>
 
-        {/* Main Content */}
         <main className="container mx-auto px-4 py-8">
           <div className="space-y-8">
-            {/* Welcome Section */}
             <div className="text-center space-y-2">
               <h1 className="text-4xl font-bold">
                 Bienvenue sur GH₂
@@ -66,9 +64,7 @@ export default function Dashboard() {
               </p>
             </div>
 
-            {/* Quick Actions Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Diagnostic */}
               <Card className="hover:shadow-premium transition-shadow cursor-pointer" onClick={() => navigate('/dashboard/diagnostic')}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -86,7 +82,6 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              {/* Historique Diagnostics */}
               <Card className="hover:shadow-premium transition-shadow cursor-pointer" onClick={() => navigate('/dashboard/diagnostic-history')}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -104,8 +99,26 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              {/* Véhicules */}
-              <Card className="hover:shadow-premium transition-shadow cursor-pointer" onClick={() => navigate('/dashboard/vehicles')}>
+              {hasAnyRole('technicien', 'gerant', 'admin_gh2') && (
+                <Card className="hover:shadow-premium transition-shadow cursor-pointer" onClick={() => navigate('/missions')}>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Briefcase className="h-5 w-5 text-primary" />
+                      Missions Techniciens
+                    </CardTitle>
+                    <CardDescription>
+                      Gérez vos interventions
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Acceptez et gérez vos missions en temps réel
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+
+              <Card className="hover:shadow-premium transition-shadow cursor-pointer">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Car className="h-5 w-5 text-primary" />
@@ -117,79 +130,94 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Ajoutez et suivez vos véhicules
+                    Ajoutez et gérez vos véhicules
                   </p>
                 </CardContent>
               </Card>
 
-              {/* Missions */}
-              <Card className="hover:shadow-premium transition-shadow cursor-pointer" onClick={() => navigate('/dashboard/missions')}>
+              <Card className="hover:shadow-premium transition-shadow cursor-pointer">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Wrench className="h-5 w-5 text-primary" />
-                    Mes Interventions
+                    Services
                   </CardTitle>
                   <CardDescription>
-                    Suivez vos réparations
+                    Réservez un service
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Historique et interventions en cours
+                    Entretien, réparation, dépannage
                   </p>
                 </CardContent>
               </Card>
 
-              {/* Marketplace */}
-              <Card className="hover:shadow-premium transition-shadow cursor-pointer" onClick={() => navigate('/marketplace')}>
+              <Card className="hover:shadow-premium transition-shadow cursor-pointer">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <ShoppingCart className="h-5 w-5 text-primary" />
                     Marketplace
                   </CardTitle>
                   <CardDescription>
-                    Achetez véhicules et accessoires
+                    Boutique en ligne
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Kits HHO, accessoires et véhicules d'occasion
+                    Pièces, accessoires, kits HHO
                   </p>
                 </CardContent>
               </Card>
 
-              {/* Fidélité */}
-              <Card className="hover:shadow-premium transition-shadow cursor-pointer" onClick={() => navigate('/dashboard/loyalty')}>
+              {hasAnyRole('technicien', 'gerant', 'rh', 'admin_gh2') && (
+                <Card className="hover:shadow-premium transition-shadow cursor-pointer">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Clock className="h-5 w-5 text-primary" />
+                      Pointage RH
+                    </CardTitle>
+                    <CardDescription>
+                      Gestion du temps
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Pointez vos heures de travail
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+
+              <Card className="hover:shadow-premium transition-shadow cursor-pointer">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-primary" />
+                    Nos Agences
+                  </CardTitle>
+                  <CardDescription>
+                    Trouvez une agence
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Localisez l'agence la plus proche
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-premium transition-shadow cursor-pointer">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Star className="h-5 w-5 text-primary" />
-                    Programme Fidélité
+                    Fidélité
                   </CardTitle>
                   <CardDescription>
-                    Vos points et récompenses
+                    Programme de récompenses
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Gagnez des points à chaque intervention
-                  </p>
-                </CardContent>
-              </Card>
-
-              {/* Historique */}
-              <Card className="hover:shadow-premium transition-shadow cursor-pointer" onClick={() => navigate('/dashboard/history')}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-primary" />
-                    Historique
-                  </CardTitle>
-                  <CardDescription>
-                    Toutes vos activités
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Diagnostics, interventions et achats
+                    Gagnez des points à chaque achat
                   </p>
                 </CardContent>
               </Card>
