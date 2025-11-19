@@ -16,13 +16,29 @@ Le module Pointage RH permet aux techniciens, employés et personnel RH de gére
    - Bouton de check-out avec notes optionnelles
    - Tableau d'historique des pointages
    - Bouton d'export CSV
+   - Lien vers la vue admin (si autorisé)
+
+2. **`src/pages/PointageAdmin.tsx`**
+   - Vue administrative RH pour gérer tous les employés
+   - Dashboard avec statistiques agrégées:
+     - Nombre d'employés actifs
+     - Total heures travaillées
+     - Heures facturables et pourcentage
+     - Heures non facturables et pourcentage
+     - Moyenne heures par employé
+   - Filtres avancés:
+     - Par employé (dropdown avec tous les profils)
+     - Par période (date début et fin)
+     - Par type (facturable/non facturable/tous)
+   - Tableau complet des pointages avec profils employés
+   - Export CSV enrichi avec informations employé
 
 ### Hooks
 
 **`src/hooks/usePointage.ts`**
 ```typescript
 {
-  pointages: Pointage[];           // Liste des pointages
+  pointages: Pointage[];           // Liste des pointages de l'utilisateur
   currentPointage: Pointage | null; // Pointage en cours (check_out = null)
   loading: boolean;                 // État de chargement
   checkIn: (isBillable, notes?) => void;     // Pointer l'arrivée
@@ -31,11 +47,27 @@ Le module Pointage RH permet aux techniciens, employés et personnel RH de gére
 }
 ```
 
+**`src/hooks/usePointageAdmin.ts`**
+```typescript
+{
+  pointages: PointageWithProfile[];  // Tous les pointages avec profils
+  employees: Profile[];              // Liste des employés
+  loading: boolean;                  // État de chargement
+  filters: PointageFilters;          // Filtres actifs
+  setFilters: (filters) => void;     // Modifier les filtres
+  updatePointage: (id, updates) => void;  // Modifier un pointage
+  calculateStats: () => PointageStats;    // Calculer les statistiques
+  exportToCSV: () => void;                // Export CSV enrichi
+}
+```
+
 **Fonctionnalités:**
 - Realtime avec Supabase pour synchronisation instantanée
 - Calcul automatique des heures travaillées lors du check-out
 - Toast notifications pour feedback utilisateur
 - Export CSV avec formatage français (date, heures)
+- Filtrage multi-critères (employé, date, type)
+- Statistiques agrégées en temps réel
 
 ## Base de données
 
@@ -55,7 +87,7 @@ Le module Pointage RH permet aux techniciens, employés et personnel RH de gére
 ### RLS Policies
 
 ```sql
--- Utilisateurs peuvent voir leurs pointages
+-- Utilisateurs peuvent voir leurs propres pointages
 CREATE POLICY "Users can view their own time records"
 ON pointage FOR SELECT
 USING (auth.uid() = user_id);
@@ -64,17 +96,53 @@ USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert their own time records"
 ON pointage FOR INSERT
 WITH CHECK (auth.uid() = user_id);
+
+-- RH/Gérants/Admins peuvent voir tous les pointages
+CREATE POLICY "RH can view all time records"
+ON pointage FOR SELECT
+USING (
+  public.has_role(auth.uid(), 'rh') OR 
+  public.has_role(auth.uid(), 'gerant') OR 
+  public.has_role(auth.uid(), 'admin_gh2')
+);
+
+-- RH/Gérants/Admins peuvent modifier tous les pointages
+CREATE POLICY "RH can update all time records"
+ON pointage FOR UPDATE
+USING (
+  public.has_role(auth.uid(), 'rh') OR 
+  public.has_role(auth.uid(), 'gerant') OR 
+  public.has_role(auth.uid(), 'admin_gh2')
+);
+```
+
+### Indexes
+
+```sql
+-- Index pour améliorer les performances des filtres
+CREATE INDEX idx_pointage_check_in ON pointage(check_in DESC);
+CREATE INDEX idx_pointage_user_id ON pointage(user_id);
 ```
 
 ## Contrôle d'accès
 
 ### Rôles autorisés
+
+**Pour la vue utilisateur (/pointage):**
 - ✅ **technicien**: Pointer leurs heures de travail
 - ✅ **gerant**: Pointer et voir leurs heures
-- ✅ **rh**: Pointer et voir leurs heures (futur: voir tous les employés)
+- ✅ **rh**: Pointer et voir leurs heures
 - ✅ **admin_gh2**: Accès complet
 - ❌ **client**: Pas d'accès au pointage
 - ❌ **invite**: Pas d'accès au pointage
+
+**Pour la vue admin (/pointage/admin):**
+- ✅ **rh**: Voir et gérer tous les pointages
+- ✅ **gerant**: Voir et gérer tous les pointages de leur agence
+- ✅ **admin_gh2**: Accès complet à tous les pointages
+- ❌ **technicien**: Pas d'accès à la vue admin
+- ❌ **client**: Pas d'accès
+- ❌ **invite**: Pas d'accès
 
 ## Flux utilisateur
 
@@ -109,32 +177,61 @@ WITH CHECK (auth.uid() = user_id);
   - Type (Facturable/Non facturable)
   - Notes
 
+### 5. Vue Admin RH (nouveauté)
+1. Accès via `/pointage/admin` ou bouton "Vue Admin" sur la page Pointage
+2. Dashboard avec 5 statistiques clés
+3. Filtres avancés:
+   - Sélection d'employé spécifique
+   - Période personnalisée (date début/fin)
+   - Filtrage par type d'heures
+4. Tableau enrichi avec informations employés
+5. Export CSV global avec colonnes:
+   - Employé (nom complet)
+   - Email
+   - Date
+   - Heures d'arrivée/départ
+   - Heures travaillées
+   - Type (Facturable/Non facturable)
+   - Notes
+
 ## Format d'export CSV
 
+### Export utilisateur
 ```csv
 Date,Arrivée,Départ,Heures,Facturable,Notes
 "19/11/2025","09:00:00","17:30:00","8.50","Oui","Installation kit HHO"
 "18/11/2025","08:45:00","12:15:00","3.50","Non","Formation interne"
 ```
 
+### Export admin RH
+```csv
+Employé,Email,Date,Arrivée,Départ,Heures,Facturable,Notes
+"Jean Dupont","jean.dupont@gh2.fr","19/11/2025","09:00:00","17:30:00","8.50","Oui","Installation kit HHO"
+"Marie Martin","marie.martin@gh2.fr","19/11/2025","08:45:00","16:00:00","7.25","Oui","Diagnostic client"
+"Pierre Durant","pierre.durant@gh2.fr","18/11/2025","08:45:00","12:15:00","3.50","Non","Formation interne"
+```
+
 ## Fonctionnalités futures (V2)
 
-### Pour les RH
-- [ ] Vue consolidée de tous les employés
-- [ ] Filtres par date, employé, type d'heures
+### Pour les RH (✅ Implémenté)
+- [x] Vue consolidée de tous les employés
+- [x] Filtres par date, employé, type d'heures
+- [x] Export global multi-employés
+- [x] Statistiques par période
 - [ ] Validation/approbation des pointages
-- [ ] Export global multi-employés
-- [ ] Statistiques par période (semaine, mois)
+- [ ] Alertes heures supplémentaires
+- [ ] Rapports mensuels automatiques
 
 ### Pour les managers
 - [ ] Vue d'équipe par agence
-- [ ] Alertes heures supplémentaires
 - [ ] Comparaison heures prévues vs réelles
+- [ ] Dashboard hebdomadaire
 
 ### Intégrations
 - [ ] Synchronisation avec paie
-- [ ] Export vers logiciels comptables
+- [ ] Export vers logiciels comptables (Sage, Cegid)
 - [ ] API pour outils externes
+- [ ] Notifications automatiques fin de mois
 
 ## Sécurité
 
